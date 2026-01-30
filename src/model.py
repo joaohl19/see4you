@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from src.dataset import Vocabulary
 import torchvision.models as models
 
 class PreTrainedMobileNetV3(nn.Module):
@@ -38,6 +39,7 @@ class ScratchGRU(nn.Module):
 
     self.end_idx = vocab.stoi["<EOS>"]
     self.pad_idx = vocab.stoi["<PAD>"]
+    self.start_idx = vocab.stoi["<SOS>"]
     self.vocab_size = len(vocab)
     self.embed_size = embed_size
 
@@ -65,7 +67,7 @@ class ScratchGRU(nn.Module):
 
     # This line improves EFFICIENCY and CORRECTNESS --> It guarantees that the RNN only processes the real tokens, ignoring the padding tokens
     packed_embedded_captions = nn.utils.rnn.pack_padded_sequence(
-        embedded_captions, captions_lengths.cpu(), batch_first=True, enforce_sorted=False
+        embedded_captions, captions_lengths, batch_first=True, enforce_sorted=False
     )
 
     hiddens, _ = self.gru(packed_embedded_captions)
@@ -80,7 +82,7 @@ class ScratchGRU(nn.Module):
 
 
 class ImageCaptionModel(nn.Module):
-  def __init__(self, cnn:nn.Module, rnn:nn.Module):
+  def __init__(self, cnn:PreTrainedMobileNetV3, rnn:ScratchGRU):
     super().__init__()
     self.cnn = cnn
     self.rnn = rnn
@@ -89,27 +91,26 @@ class ImageCaptionModel(nn.Module):
     logits = self.rnn(self.cnn(images), captions, captions_lengths)
     return logits
 
-  def infer(self, image, vocabulary, max_caption_len:int=50):
+  def infer(self, image, max_caption_len:int=100):
     done = False
     predicted_sequence = []
-    with torch.no_grad():
-      # Check the images dimensions
-      if len(image.shape) == 3:
-        image = image.unsqueeze(0)  # Add batch dimension to the image
-      encoded = self.cnn(image).unsqueeze(1) # Add seq len dimension to the encoded image of shape (1, embed_size) 
-      h_i = None
-      while not done:
-        hiddens, h_i = self.rnn.rnn(encoded, h_i)
-        outputs = self.rnn.classifier(hiddens)
+    # Check the images dimensions
+    if len(image.shape) == 3:
+      image = image.unsqueeze(0)  # Add batch dimension to the image
+    encoded = self.cnn(image).unsqueeze(1) # Add seq len dimension to the encoded image of shape (1, embed_size) 
+    h_i = None
+    while not done:
+      hiddens, h_i = self.rnn.gru(encoded, h_i)
+      outputs = self.rnn.classifier(hiddens)
 
-        predicted_token = torch.argmax(outputs, dim=2)
-        predicted_sequence.append(predicted_token.item())
+      predicted_token = torch.argmax(outputs, dim=2)
+      predicted_sequence.append(predicted_token.item())
 
-        # Ends the loop when the networks predicts the <END> token or when the captions reaches the maximum length
-        if(len(predicted_sequence) >= max_caption_len) or (predicted_token.item() == self.rnn.end_idx):
-          done = True
-          
-        encoded = self.rnn.embedding(predicted_token)
-        encoded = self.rnn.dropout(encoded)
+      # Ends the loop when the networks predicts the <END> token or when the captions reaches the maximum length
+      if(len(predicted_sequence) >= max_caption_len) or (predicted_token.item() == self.rnn.end_idx):
+        done = True
+        
+      encoded = self.rnn.embedding(predicted_token)
+      encoded = self.rnn.dropout(encoded)
 
     return predicted_sequence
