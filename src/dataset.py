@@ -47,12 +47,13 @@ class Vocabulary:
 
 
 class FlickrDataset(Dataset):
-    def __init__(self, root_dir, df, vocab, transform=None, max_tokens=50):
+    def __init__(self, root_dir, df, vocab, transform=None, max_tokens=50, is_eval=False):
         self.root_dir = root_dir
         self.df = df
         self.vocab = vocab
         self.transform = transform
         self.max_tokens = max_tokens
+        self.is_eval = is_eval
 
     def __len__(self):
         return len(self.df)
@@ -65,6 +66,10 @@ class FlickrDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
+        if self.is_eval:
+            captions = self.df.iloc[index]['caption_clean']
+            return image, captions
+
         caption = self.df.iloc[index]['caption_clean']
         tokens = self.vocab.tokenize(caption)
 
@@ -75,6 +80,7 @@ class FlickrDataset(Dataset):
             tokenized_caption = tokenized_caption[:self.max_tokens]
 
         return image, torch.tensor(tokenized_caption)
+
     
 def collate_fn(batch, padding_idx=0):
     # Sorting batch in descending order here to save some computational cost instead of sorting the batch in the forward pass by the pack padded sequence method
@@ -87,7 +93,7 @@ def collate_fn(batch, padding_idx=0):
 
 def preprocess_data(train_dataset: FlickrDataset, val_dataset: FlickrDataset, test_dataset: FlickrDataset, batch_size:int, padding_idx=0):
 
-    cpu_count = os.cpu_count()
+    cpu_count = int(os.cpu_count() or 2)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=cpu_count, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=cpu_count, pin_memory=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=cpu_count, pin_memory=True)

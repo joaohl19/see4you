@@ -8,3 +8,4 @@ seaborn
 scikit-learn
 tqdm 
 numpy>=1.22.4,<2.0.0
+pycocoevalcap
