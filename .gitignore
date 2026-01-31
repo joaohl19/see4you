@@ -211,3 +211,4 @@ __marimo__/
 #python code
 data/
 embeddings/
+checkpoints/
