@@ -49,6 +49,11 @@ Antes de iniciar o treinamento, é necessário configurar o ambiente e baixar os
 ### 📥 2. Preparação dos Dados
 Em seguida, é necessário fazer o tratamento dos dados usados no treinamento. Execute o notebook **`eda.ipynb`** para realizar este processo.
 
+**O que este notebook faz:**
+* **Dataset:** Baixa e descompacta o dataset de imagens e legendas.
+* **Embeddings:** Realiza o download dos embeddings pré-treinados **FastText**.
+* **Estrutura:** Cria automaticamente as pastas `/data` e `/embeddings` no diretório raiz do projeto.
+
 ### 🔬 3. Análise e Tratamento de Dados (EDA)
 
 Em seguida, é necessário fazer o tratamento dos dados usados no treinamento. Execute o notebook **`eda.ipynb`** para realizar este processo.
