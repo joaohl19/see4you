@@ -1,67 +1,68 @@
 # 👁️ See4You
 
-O **See4You** é um projeto de *Image Captioning* (Legendagem Automática de Imagens) desenvolvido com o propósito central de **assistir pessoas com deficiência visual**. O sistema processa as imagens do ambiente e descreve o cenário em linguagem natural, promovendo maior autonomia e inclusão digital.
+**See4You** is an **Image Captioning** project developed with the core purpose of **assisting visually impaired individuals**. The system processes environmental images and describes the scene in natural language, promoting greater autonomy and digital inclusion.
 
 ---
 
-## ⚙️ Arquitetura e Performance
+## ⚙️ Architecture and Performance
 
-Para garantir que o projeto possa ser executado em dispositivos com recursos limitados (como smartphones ou sistemas embarcados de assistência), a eficiência computacional foi a prioridade máxima.
+To ensure the project can run on resource-constrained devices (such as smartphones or embedded assistive systems), computational efficiency was the top priority.
 
-O modelo final utiliza a seguinte arquitetura:
-* **Encoder (Visão):** **MobileNetV3** — Rede convolucional pré-treinada, responsável por extrair a representação vetorial da imagem.
-* **Decoder (Linguagem):** **GRU** (Gated Recurrent Unit) — Rede recorrente responsável pela geração de texto.
+The final model utilizes the following architecture:
+* **Encoder (Vision):** **MobileNetV3** — A pre-trained convolutional neural network responsible for extracting the image's vector representation.
+* **Decoder (Language):** **GRU** (Gated Recurrent Unit) — A recurrent neural network responsible for text generation.
 
-### Por que esta escolha?
+### Why this choice?
 
-Realizamos testes rigorosos comparando diferentes redes recorrentes e redes convolucionais pré-treinadas. A combinação **MobileNetV3 + GRU** obteve métricas próximas às das outras arquiteturas, porém com uma redução significativa no tempo de execução
+We conducted rigorous testing comparing different recurrent networks and pre-trained convolutional networks. The **MobileNetV3 + GRU** combination achieved metrics close to other architectures but with a significant reduction in execution time.
 
-| Comparativo de Arquitetura | Ganho de Velocidade |
+| Architecture Comparison | Speed Gain |
 | :--- | :--- |
-| **vs. MobileNetV3 + LSTM** | ⚡ **2.0x mais rápida** |
-| **vs. ResNet50 + GRU** | ⚡⚡ **2.5x mais rápida** |
+| **vs. MobileNetV3 + LSTM** | ⚡ **2.0x faster** |
+| **vs. ResNet50 + GRU** | ⚡⚡ **2.5x faster** |
 
-Isso significa menos latência entre a captura da imagem e a descrição auditiva para o usuário, algo crítico para aplicações de acessibilidade.
+This translates to lower latency between image capture and the auditory description for the user—a critical factor for accessibility applications.
 
 ---
-## 🛠️ Instalação e Execução
 
-O projeto foi estruturado para ser reprodutível e simples de configurar. Siga os passos abaixo para preparar o ambiente e treinar o modelo.
+## 🛠️ Installation and Setup
 
-### 1. Clonar e Instalar Dependências
+The project is structured to be reproducible and easy to configure. Follow the steps below to set up your environment and train the model.
 
-Clone este repositório e instale as bibliotecas necessárias:
+### 1. Clone and Install Dependencies
+
+Clone this repository and install the required libraries:
 
 ```bash
-git clone [https://github.com/seu-usuario/see4you.git](https://github.com/seu-usuario/see4you.git)
+git clone [https://github.com/your-user/see4you.git](https://github.com/your-user/see4you.git)
 cd see4you
 pip install -r requirements.txt
 ```
-### 📥 2. Download dos Dados
 
-Antes de iniciar o treinamento, é necessário configurar o ambiente e baixar os dados necessários. Execute o notebook **`setup.ipynb`** para realizar este processo.
+### 📥 2. Data Download
 
-**O que este notebook faz:**
-* **Dataset:** Baixa e descompacta o dataset de imagens e legendas.
-* **Embeddings:** Realiza o download dos embeddings pré-treinados **FastText**.
-* **Estrutura:** Cria automaticamente as pastas `/data` e `/embeddings` no diretório raiz do projeto.
+Before starting the training, you must configure the environment and download the necessary data. Run the **`setup.ipynb`** notebook to perform this process.
 
-### 🔬 3. Análise e Tratamento de Dados (EDA)
+**What this notebook does:**
+* **Dataset:** Downloads and extracts the image and caption dataset.
+* **Embeddings:** Downloads the **FastText** pre-trained embeddings.
+* **Structure:** Automatically creates the `/data` and `/embeddings` folders in the project root.
 
-Em seguida, é necessário fazer o tratamento dos dados usados no treinamento. Execute o notebook **`eda.ipynb`** para realizar este processo.
+### 🔬 3. Data Analysis and Treatment (EDA)
 
-**O que este notebook faz:**
-* **Análise Exploratória:** Gera estatísticas e visualizações sobre as imagens e o tamanho das legendas.
-* **Limpeza:** Aplica filtros e tratamentos para remover ruídos ou dados inconsistentes.
-* **Exportação:** Salva o dataset limpo na pasta **`data/cleaned`**, que será a fonte oficial para o treinamento.
+Next, you need to process the data used for training. Run the **`eda.ipynb`** notebook to complete this step.
 
+**What this notebook does:**
+* **Exploratory Data Analysis:** Generates statistics and visualizations regarding images and caption lengths.
+* **Cleaning:** Applies filters and processing to remove noise or inconsistent data.
+* **Export:** Saves the cleaned dataset in the **`data/cleaned`** folder, which will be the source for training.
 
-### 📊 4. Treinamento e Avaliação
+### 📊 4. Training and Evaluation
 
-Com os dados organizados, execute o notebook **`training.ipynb`** para iniciar o pipeline.
+With the data organized, run the **`training.ipynb`** notebook to start the pipeline.
 
-**O fluxo de execução inclui:**
-1.  **Pré-processamento:** Carregamento dos DataLoaders e tokenização.
-2.  **Modelagem:** Instanciação da arquitetura **MobileNetV3 + GRU**.
-3.  **Treino:** Execução das épocas de treinamento com monitoramento da *Loss*.
-4.  **Teste:** Avaliação automática utilizando métricas de similaridade no conjunto de teste.
+**The execution flow includes:**
+1. **Preprocessing:** Loading DataLoaders and tokenization.
+2. **Modeling:** Instantiating the **MobileNetV3 + GRU** architecture.
+3. **Training:** Running training epochs while monitoring the *Loss*.
+4. **Testing:** Automatic evaluation using similarity metrics on the test set.
